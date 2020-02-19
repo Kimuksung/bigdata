@@ -1,0 +1,12 @@
+1. oracle program install 
+	- jdk install
+	- eclipse install
+	- oracle install and environment
+	- eclipse + oracle db
+
+2. user 등록(scott/tiger)
+
+3. New project
+	- oracle SQL 기본 개념
+	- SQL : DDL / DML / DCL
+	- oracle datadype , sequence , 제약 조건
