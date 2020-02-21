@@ -96,7 +96,7 @@ insert into professor
 values (4007,'허은','silver-her','조교수',290,to_date('2001-05-23','YYYY-MM-DD'),30,301,'silver-her@daum.net',null);
 
 select * from professor; -- 16개 레코드
-
+select * from tab;
 drop table student purge; -- 테이블 제거(임시파일 삭제)
 
 -- 학생 테이블 
@@ -194,6 +194,7 @@ insert into department
 values (20,'인문대학',null,null);
 
 select * from department; -- 레코드 12개
+select * from tab;
 
 drop table dept cascade constraint;  
 
@@ -225,7 +226,7 @@ select * from gift; -- 레코드 10개
 commit work;
 
 -- table 목록 조회
-select * from tab;
+select * from tab; --의사 테이블
 select TNAME from tab;
 
 
