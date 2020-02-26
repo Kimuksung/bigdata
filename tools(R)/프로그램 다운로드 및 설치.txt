@@ -1,0 +1,10 @@
+1. R 프로그램 다운로드/설치
+   R 공식 사이트 : http://www.r-project.org
+   http://healthstat.snu.ac.kr/CRAN/
+   
+2. RStudio 다운로드/설치
+   https://www.rstudio.com/
+   Download RStudio > Desktop -> DOWNLOAD RSTUDIO DESKTOP
+   
+
+※ RStudio 실행 : 관리자 권한으로 실행
