@@ -93,13 +93,122 @@ write.csv(titanic_df,"titanic_df.csv",row.names = F,quote=F)
 search()
 write.xlsx(titanic,"titanic.xlsx",sheetName = "titanic", row.names=FALSE)
 
+name <- c("kim","lee","choi","park")
+which(name=="choi") 
+
+library(MASS)
+data("Boston")
+str(Boston)
+names<- names(Boston)
+names
+
+#x(독립변수), y(종속 변수) 선택
+#n개의 column의 data들이 있는데 이를 하나의 data에 가장 크게 영향을 끼치는 것을 찾는다.
+# y = 하나의 data
+y_col <- which(names=="medv")
+
+Y <- Boston[y_col] # y(종속 변수)
+X <- Boston[-y_col] # x(독립변수)
+
+# iris을 dataset을 대상으로 x변수(1~4)
+data("iris")
+names<-names(iris)
+names(iris)
+names
+y_col <- which(names=="Species" )
+
+Y <- iris[y_col]
+Y
+X <- iris[-y_col]
+
+#for 문
+# 열거형 객체
+num <- scan()
+for(i in 1:5){
+  if(num[i]%%2==0){
+    print(num[i])
+  }
+}
+
+setwd("C:/ITWILL/2_Rwork/Part-I")
+sample <-read.csv("sam_kospi.csv")
+str(sample)
+
+#칼럼 추가 high- low
+sample$diff <- sample$High - sample$Low
+str(sample)
+
+diff_result=""
+row <- nrow(sample) #칼럼 갯수
+for( i in 1:nrow(sample)){
+  if(sample$diff[i]>=mean(sample$diff)){
+    diff_result[i]= "평균 이상"
+  }else{
+    diff_result[i]= "평균 이하"
+  }
+}
+sample$diff_reulst <- diff_result
+head(sample)
 
 
+#bug report
+install.packages('RSADBE')
+library(RSADBE)
+data("Bug_Metrics_Software")
+str(Bug_Metrics_Software)
 
+#발표 전
+Bug_Metrics_Software[,,1]
 
+rowSums(Bug_Metrics_Software[,,1]) # software별 bug 합계
+colSums(Bug_Metrics_Software[,,1]) # bug 별 bug 합계
+rowMeans(Bug_Metrics_Software[,,1]) #software 별 평균
+colMeans(Bug_Metrics_Software[,,1]) #bug 별 평균
 
+#발표 후
+Bug_Metrics_Software[,,2]
 
+Bug_Metrics_Software
 
+# 난수 생성과 확률 분포
+# 1) 정규 분포를 따르는 난수 - 연속 확률 분포(실수형)
+# 형식) rnorm(n,mean=(),sd=1)
+n<-1000
+r<-rnorm(n)
+hist(r)
 
+# 2) 균등분포를 따르는 난수 - 연속 확률 분포(실수형)
+# 형식) runif(n,min=,max=)
+r2<-runif(n,min=10,max=100)
+r2
+hist(r2)
 
+# 3) 이항 분포를 따르는 난수 - 이산확률 분포(정수형)
+# 형식) rbinom(n,size=,확률)
+set.seed(123) #똑같은 data를 가질 수 있도록 해준다.(매번 바뀌는거 금지)
+r3<-rbinom(n,1,0.5)
+r3
+hist(r3)
+table(r3)
 
+# 4) sample
+sample(10:20,5)
+sample(c(10:20,50:100),10)
+
+#train / test set 생성 시 사용 70% / 30% hold-out 방식 
+dim(iris)
+idx<-sample(nrow(iris), size=nrow(iris)*0.7)
+range(idx) 150
+length(idx) 105
+train<- iris[idx,]
+test<- iris[-idx,]
+dim(train) #105개 70%
+dim(test) #45개 30%
+
+# 4. 행렬 연산 내장 함수
+x<- matrix(1:9,nrow=3,byrow=T)
+x
+y<- matrix(1:3,nrow=3)
+y
+
+x%*%y
