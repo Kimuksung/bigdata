@@ -268,6 +268,13 @@ qplot(mpg, wt, data=mtcars, color=factor(cyl), geom="line")
 qplot(wt, mpg, data=mtcars, geom=c("point", "smooth"))
 
 
+library(UsingR)
+data("galton")
+head(galton)
+
+p = ggplot(data=galton,aes(x=parent,y=child))
+p + geom_count()+geom_smooth(method="lm")
+
 # 2. ggplot()함수
 
 # (1) aes(x,y,color) 옵션 

@@ -50,19 +50,6 @@ barplot(emp_sal_tot$dept_tot,
 
 
 # example date / 지역 / 성별 / 나이 
-월 /서울/ 남  /24
-월/경기 /여/55
-월/서울/남/35
-
-화 / 서울 / 여 /19
-화 / 경기 / 여 /23
-화 / 서울 /남 /39
-
-수 / 서울 / 남 / 17
-수 / 서울 / 여/21
-수 / 서울 / 여/33
-수 / 서울 / 남/28
-
 a = c("월" ,"서울", "남",24)
 b = c("월" ,"경기", "여",55)
 c = c("월" ,"서울", "남",35)
@@ -91,6 +78,10 @@ data$agelabel[data$age<30 & data$'age'>=20]=2
 data$agelabel[data$age<40 & data$'age'>=30]=3
 data$agelabel[data$age>40]=4
 data
-data%>%group_by(agelabel) %>%  tally()
+temp = data%>%group_by(요일,agelabel) %>%  tally()
+#temp = data%>%group_by(agelabel) %>%  tally()
 ggplot()
 ggplot(df,aes(x='요일',y=count(agelabel))) +geom_bar(stat='identity')
+barplot(temp$n | temp$'요일') 
+        #col = rainbow(4))#,
+        #names.arg = dname)
