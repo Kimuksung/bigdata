@@ -104,4 +104,43 @@ var.test(method1$score, method2$score)
 #p-value = 0.8494 -> 동질성 분포 : t.test()
 
 t.test(method1_score, method2_score)
-약간의 차이가 있다.
+#약간의 차이가 있다.
+
+
+
+# 05. iris dataset을 이용하여 분산 분석으로 수행하시오.
+iris
+# 독립 변수 : Species(집단 변수)
+# 종속 변수 : 전제조건을 마족하는 변수(1~4 칼럼) 선택
+# Sepal.Length Sepal.Width Petal.Length Petal.Width
+# 분산 분석 수행 -> 사후 검정
+Species = iris$Species
+table(Species, useNA="ifany")
+table(method, Sepal.Width , useNA="ifany")
+
+summary(iris)
+plot(iris$Sepal.Width)
+boxplot(iris$Sepal.Width)$stats
+mean(iris$Sepal.Width)
+
+boxplot(iris$Sepal.Width)$stats
+
+# 동질성 검정
+bartlett.test(Sepal.Length ~Species , data=iris)
+#p-value 0.0003345 x
+
+bartlett.test(Sepal.Width ~Species , data=iris)
+#p-value 0.3515 o 
+
+result <- aov(Sepal.Width ~Species , data=iris)
+summary(result) 
+#p-value < 0.05종에 따라 적어도 한집단의 평균 width 의 차이가 있다.
+
+TukeyHSD(result) 
+#virginica-versicolor은 큰차이를 보인다.
+
+plot(TukeyHSD(result))
+
+library(dplyr)
+
+iris %>% group_by(Species) %>% summarise(age = mean(Sepal.Width))
