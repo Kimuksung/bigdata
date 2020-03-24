@@ -59,3 +59,5 @@ sqrt(vif(model)) > 2 # TRUE
 formula = Sepal.Length ~ Sepal.Width + Petal.Length 
 model <- lm(formula = formula,  data=iris)
 summary(model) # 모델 평가
+
+

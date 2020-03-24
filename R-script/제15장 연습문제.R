@@ -96,6 +96,7 @@ r
 # <조건3> 분류 정확도 구하기 
 
 # 파일 불러오기
+admit = read.csv(choose.files())
 admit <- read.csv('admit.csv')
 str(admit) # 'data.frame':	400 obs. of  4 variables:
 #$ admit: 입학여부 - int  0 1 1 1 0 1 1 0 1 0 ...
@@ -106,10 +107,24 @@ str(admit) # 'data.frame':	400 obs. of  4 variables:
 # 1. data set 구성 
 idx <- sample(1:nrow(admit), nrow(admit)*0.7)
 train_admit <- admit[idx, ]
-test_admin <- admit[-idx, ]
+test_admit <- admit[-idx, ]
 
 # 2. model 생성 
+admit_model=glm(admit ~ ., data = train_admit, family = 'binomial')
 
 # 3. predict 생성 
-
+admit_pred = predict(admit_model, newdata=test_admit, type="response")
+y_pred = ifelse(admit_pred>=0.5,1,0)
+x_true = test_admit$admit
 # 4. 모델 평가(분류정확도) : 혼돈 matrix 이용/ROC Curve 이용
+tab = table(x_true , y_pred)
+tab
+
+acc = (tab[1,1]+tab[2,2]/sum(tab))
+acc
+
+library(ROCR)
+pr <- prediction(admit_pred, test_admit$admit)
+prf <- performance(pr, measure = "tpr", x.measure = "fpr")
+plot(prf)
+
