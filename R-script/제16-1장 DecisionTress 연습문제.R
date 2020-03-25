@@ -68,7 +68,9 @@ model = rpart(RainTomorrow~., data=weather_train)
 fancyRpartPlot(model)
 
 # 단계5 : 예측 확률 범주화('Yes Rain', 'No Rain') 
-pred <- predict(model, weather_test, type="class")
+#pred <- predict(model, weather_test, type="class")
+pred <- predict(model, weather_test)
+pred = iflese(pred[,1]>=0.5, "Yes Rain","No Rain")
 pred
 
 # 단계6 : 혼돈 matrix 생성 및 분류 정확도 구하기
