@@ -259,6 +259,147 @@ prop.table(table(not_samsung$brand_prefer))*100
 # 탕맛기픈 
 # 6.7803641739707636 
 
-# 위 값을 이용하여 일반적인 갯수를 맞추어보자.
-# samsung data에서 2018/1/1에 TAKE OUT한사람 실제 data와 예측 data
+#------------------------------------------------------------------
 
+# 위 값을 이용하여 일반적인 갯수를 맞추어보자.
+# 2018/1/1 부터 하루에 몇명 정도 먹는지 + 단골은 몇명 + 비 단골은 몇명
+# 먹는 사람들 중 비율은 어떻게 되는지
+# 하루 먹는 사람들중 단골 vs 비단골 나이 ,성별 비율
+# samsung data에서 2018/1/1에 TAKE OUT한사람 실제 data와 예측 data
+# TAKE OUT = 460 / KOREAN1 = 404 / 고슬고슬 = 218
+
+df %>% group_by(SELL_DATE)%>%summarise(a_sum=sum(QUANTITY) )
+str(df)
+temp=subset(df , SELL_DATE=="2018-01-02")
+dim(temp) #3126 
+temp2 = df %>% group_by(SELL_DATE)%>%summarise(a_sum=sum(QUANTITY))
+temp2
+
+#토요일 제거
+dim(df) # 1023473
+df$day <- weekdays(as.Date(df$SELL_DATE))
+table(df$day)
+df = df[!(df$day == "토요일" ), ]
+table(df$day)
+
+#일일 평균
+temp2 = df %>% group_by(SELL_DATE)%>%summarise(a_sum=sum(QUANTITY))
+mean(temp2$a_sum, na.rm = FALSE) #3001.211
+max(temp2$a_sum) #3626 "2019-05-20"
+min(temp2$a_sum) #1538 "2018-12-31"
+length(temp2$a_sum) #342
+plot(temp2$a_sum)
+summary(temp2$a_sum)
+boxplot(temp2$a_sum)$stats #2379 ~ 3626 이상치 제거
+temp2 = subset(temp2, a_sum>=2379)
+mean(temp2$a_sum, na.rm = FALSE) #3028
+
+
+#단골의 일일 평균
+samsungman = samsung%>% group_by(SELL_DATE)%>%summarise(a_sum=sum(QUANTITY))
+mean(samsungman$a_sum, na.rm = FALSE)
+boxplot(samsungman$a_sum)$stats #1871.0 ~ 3187.0
+samsungman = subset(samsungman , a_sum>=1871 & a_sum<=3187)
+mean(samsungman$a_sum) #2634.551
+
+#비단골의 일일 평균
+nonsamsungman = not_samsung %>% group_by(SELL_DATE)%>%summarise(a_sum=sum(QUANTITY))
+mean(nonsamsungman$a_sum, na.rm = FALSE) #325.0756
+boxplot(nonsamsungman$a_sum)$stats #10 ~ 672
+
+
+#TAKEOUT 일일 평균
+temp3 = subset(df,BRAND=="TakeOut")
+temp3 = temp3%>% group_by(SELL_DATE)%>%summarise(a_sum=sum(QUANTITY))
+temp3 # 399
+boxplot(temp3$a_sum)$stats #307.0 ~ 633.0
+temp3 = subset(temp3 , a_sum>=307 & a_sum<=633)
+mean(temp3$a_sum) # 479.9353
+
+
+temp2 = df %>% group_by(SELL_DATE)%>%summarise(a_sum=sum(QUANTITY))
+dim(temp2)
+dim(temp3)
+str(temp2)
+EVERYDAY_TAKEOUT=temp3$a_sum/temp2$a_sum
+EVERYDAY_TAKEOUT
+min(EVERYDAY_TAKEOUT)
+max(EVERYDAY_TAKEOUT)
+boxplot(EVERYDAY_TAKEOUT)
+boxplot(EVERYDAY_TAKEOUT)$stats #0.1243988 ~ 0.1938012
+
+# 하루 몇명 먹는지를 맞추는게 우선일듯 찾아보자자
+temp2 = df %>% group_by(SELL_DATE)%>%summarise(a_sum=sum(QUANTITY))
+plot(temp2$a_sum)
+
+#시계열 data
+install.packages('forecast')
+library(forecast)
+fit = auto.arima(temp2$a_sum)
+fcast = forecast(fit,h=30)
+plot(fcast)
+
+fcast
+df4 = read.csv('mealData_meal_test.csv', stringsAsFactors = FALSE)
+str(df4)
+test = df4 %>% group_by(SELL_DATE)%>%summarise(a_sum=sum(QUANTITY))
+test
+
+
+
+#------------
+#pd.date_range("2018-4-1", "2018-4-30", freq="B")
+start_date <- as.Date("1950-01-01")
+end_date <- as.Date("2018-12-31")
+
+library(TTR)
+library(forecast)
+table(df$BRAND)
+temp = subset(df , BRAND=='스냅스낵')
+temp = temp %>% group_by(SELL_DATE) %>% summarise(a_sum=sum(QUANTITY))
+dim(temp)
+length(AirPassengers)
+AirPassengers
+temp
+temp$a_sum
+myts <- ts(temp$a_sum, start=c(2018, 1,1), frequency=200)
+myts
+
+fit <- stl(myts, s.window=12)
+plot(fit)
+monthplot(myts)
+
+#arima(myts, order=c(p, d, q))
+auto.arima(myts)             
+fit <- arima(myts, order=c(3,1,1))
+plot(forecast(fit,5))
+forecast(fit,10)
+
+df5 = subset(df4, BRAND=='스냅스낵')
+df5 = df5 %>% group_by(SELL_DATE) %>% summarise(a_sum=sum(QUANTITY))
+df5
+
+forecast(fit,10)
+
+future = c(
+62.78885,
+83.30111 ,
+85.45210,
+79.73902,
+74.19585,
+75.35799,
+78.28745,
+79.27478,
+78.15483)
+real = c(
+61,
+41,
+68,
+74,
+96,
+56,
+57,
+71,
+35,
+38)
+future - real
