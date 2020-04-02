@@ -110,7 +110,7 @@ histogram(temper_brand_sum$temper, temper_brand_sum$a_sum)
 #------------------
 #사원별 구매 횟수
 library (dplyr)
-length(setdiff (df1$CUSTOMER_ID, df$CUSTOMER_ID)) #230명은 사원이지만 한번도 안먹엇다
+length(unique(setdiff (df1$CUSTOMER_ID, df$CUSTOMER_ID))) #230명은 사원이지만 한번도 안먹엇다
 length(unique(df$CUSTOMER_ID)) # 10570
 people_eat = df %>% group_by(CUSTOMER_ID) %>% summarise(sum(QUANTITY))
 names(people_eat) = c('CUSTOMER_ID', 'QUANTITY')
@@ -118,6 +118,10 @@ arrange(people_eat, desc(QUANTITY)) #정렬
 mean(people_eat$QUANTITY) #97.57379
 t = table(people_eat$QUANTITY>=100) #평균 보다 높게 잡았다.
 people_eat$CUSTOMER_ID[people_eat$QUANTITY>=100]
+unique(setdiff (df1$CUSTOMER_ID, df$CUSTOMER_ID))
+a=c(230,10570)
+names(a)=c('취식 안한 사람\n230','취식 한 사람\n10570')
+pie(a)
 
 df$samsung = df$CUSTOMER_ID %in% people_eat$CUSTOMER_ID[people_eat$QUANTITY>=100]
 head(df)
@@ -143,6 +147,15 @@ sum(rain_brand_sum$a_sum)
 length(unique(df$SELL_DATE[df$rain==0]))#306
 length(unique(df$SELL_DATE[df$rain!=0]))#104
 
+rain = subset(df , rain==0)
+not_rain = subset(df, rain!=0)
+rain = rain %>% group_by(SELL_DATE) %>%summarise(a_sum=sum(QUANTITY))
+not_rain = not_rain %>% group_by(SELL_DATE) %>%summarise(a_sum=sum(QUANTITY))
+plot(df$SELL_DATE,c(rain$a_sum,not_rain$a_sum))
+t = c(x,y)
+plot(t, xlim=c(1,2) , ylim = c(2000,2800))
+m = matrix(c(x,y),nrow=2)
+barplot(m,beside=T,names=c("Rain_MEAN_ONEDAY", "Not-Rain_MEAN_ONEDAY"),col=c(2,3),ylim=c(2450,2600))
 # 비가 온날의 판매량 / 비가 왔던 날 갯수
 # 269293 / 104 = 2589.3557692307691
 # 비가 오지 않는 날의 판매량 / 비가 오지 않는 날 갯수
@@ -200,20 +213,26 @@ custom_data = arrange(people_eat, desc(QUANTITY))$CUSTOMER_ID[1:4191 ]
 dim(people_eat) #4191 
 
 for(i in 1:length(custom_data)){
-#for(i in 1:10){
   custom1 = subset(samsung, CUSTOMER_ID==custom_data[i])
   t = table(custom1$BRAND)
   best=names(t)[t == max(t)]
   print(best)
   samsung$brand_prefer[samsung$CUSTOMER_ID==custom_data[i]]=best
 } 
-table(samsung$brand_prefer)
+tab=table(samsung$brand_prefer)
+
+samsung$brand_prefer
+pie(tab ,col=rainbow(length(tab)) ,labels=piepercent ,radius=1.6)
+legend("right",legend=names(tab),fill = rainbow(length(tab)),cex = 0.9)
 # Chef`sCounter       KOREAN1       KOREAN2       TakeOut       Western 
 # 32321        193751        122749        275152         11373 
 # 가츠엔  고슬고슬비빈    나폴리폴리      스냅스낵    싱푸차이나 
 # 33745         33218         35774          6388         66637 
 # 아시안픽스    우리미각면      탕맛기픈 
 # 6199         36216         37376 
+
+piepercent<- round(100*tab/sum(tab), 1)
+
 summary(samsung)
 prop.table(table(samsung$brand_prefer))*100
 # Chef`sCounter              KOREAN1              KOREAN2              TakeOut 
@@ -239,13 +258,18 @@ for(i in 1:length(custom_data)){
   print(best)
   not_samsung$brand_prefer[not_samsung$CUSTOMER_ID==custom_data[i]]=best
 } 
-table(not_samsung$brand_prefer)
+tab = table(not_samsung$brand_prefer)
+
 # Chef`sCounter       KOREAN1       KOREAN2       TakeOut       Western 
 # 4214         22707         19117         25789          4590 
 # 가츠엔  고슬고슬비빈    나폴리폴리      스냅스낵    싱푸차이나 
 # 12833          4612          6541          2872         11224 
 # 아시안픽스    우리미각면      탕맛기픈 
 # 2928          6158          8989 
+pie(tab ,col=rainbow(length(tab)) ,labels=piepercent ,radius=1.6)
+piepercent<- round(100*tab/sum(tab), 1)
+legend("right",legend=names(tab),fill = rainbow(length(tab)),cex = 0.9)
+
 summary(not_samsung)
 prop.table(table(not_samsung$brand_prefer))*100
 # Chef`sCounter             KOREAN1             KOREAN2 
@@ -291,10 +315,10 @@ length(temp2$a_sum) #342
 plot(temp2$a_sum)
 summary(temp2$a_sum)
 boxplot(temp2$a_sum)$stats #2379 ~ 3626 이상치 제거
-temp2 = subset(temp2, a_sum>=2379)
+temp2 = subset(temp2, a_sum>=2379 & a_sum<=3626)
 mean(temp2$a_sum, na.rm = FALSE) #3028
 
-
+3028
 #단골의 일일 평균
 samsungman = samsung%>% group_by(SELL_DATE)%>%summarise(a_sum=sum(QUANTITY))
 mean(samsungman$a_sum, na.rm = FALSE)
@@ -302,10 +326,17 @@ boxplot(samsungman$a_sum)$stats #1871.0 ~ 3187.0
 samsungman = subset(samsungman , a_sum>=1871 & a_sum<=3187)
 mean(samsungman$a_sum) #2634.551
 
+t = c(2634,325)
+names(t) = c('단골\n 88%','신규\n12%')
+pie(t , col=rainbow(length(t)),radius=1.6)
+pie(tab ,col=rainbow(length(tab)) ,labels=piepercent ,radius=1.6)
+piepercent<- round(100*tab/sum(tab), 1)
+legend("right",legend=names(tab),fill = rainbow(length(tab)),cex = 0.9)
 #비단골의 일일 평균
 nonsamsungman = not_samsung %>% group_by(SELL_DATE)%>%summarise(a_sum=sum(QUANTITY))
 mean(nonsamsungman$a_sum, na.rm = FALSE) #325.0756
 boxplot(nonsamsungman$a_sum)$stats #10 ~ 672
+
 
 
 #TAKEOUT 일일 평균
@@ -362,7 +393,7 @@ length(AirPassengers)
 AirPassengers
 temp
 temp$a_sum
-myts <- ts(temp$a_sum, start=c(2018, 1,1), frequency=200)
+myts <- ts(temp$a_sum, start=c(2018, 1,1), end = c(2019,5,24), frequency=30)
 myts
 
 fit <- stl(myts, s.window=12)
@@ -372,6 +403,8 @@ monthplot(myts)
 #arima(myts, order=c(p, d, q))
 auto.arima(myts)             
 fit <- arima(myts, order=c(3,1,1))
+fit <- arima(myts, order=c(2,0,0))
+fit <- arima(myts, order=c(0,1,1))
 plot(forecast(fit,5))
 forecast(fit,10)
 
@@ -380,26 +413,41 @@ df5 = df5 %>% group_by(SELL_DATE) %>% summarise(a_sum=sum(QUANTITY))
 df5
 
 forecast(fit,10)
+str(df)
 
-future = c(
-62.78885,
-83.30111 ,
-85.45210,
-79.73902,
-74.19585,
-75.35799,
-78.28745,
-79.27478,
-78.15483)
-real = c(
-61,
-41,
-68,
-74,
-96,
-56,
-57,
-71,
-35,
-38)
-future - real
+#시계열 데이터 전처리
+# 1.날짜 변수 통일
+# 2.불연속 시계열 데이터 전처리
+# 3.시계열 data 거리 계산
+
+library(dplyr)
+str(df)
+samsungtime = data.frame(df$SELL_DATE , df$BRAND , df$QUANTITY)
+names(samsungtime) = c('SELL_DATE','BRAND','QUANTITY')
+samsungtime$SELL_DATE = as.Date(samsungtime$SELL_DATE)
+samsungtime$BRAND = as.character(samsungtime$BRAND)
+str(samsungtime)
+
+samsungtime2 = samsungtime%>%group_by(BRAND)
+table(samsungtime2$BRAND)
+
+ChefsCounter = subset ( samsungtime2 , BRAND == "Chef`sCounter" ) 
+ChefsCounter = ChefsCounter %>%group_by(SELL_DATE)%>% summarise(sum=sum(QUANTITY))
+KOREAN1 = subset ( samsungtime2 , BRAND == "KOREAN1" ) 
+KOREAN1 = KOREAN1 %>%group_by(SELL_DATE)%>% summarise(sum=sum(QUANTITY))
+KOREAN2 = subset ( samsungtime2 , BRAND == "KOREAN2" ) 
+KOREAN2 = KOREAN2 %>%group_by(SELL_DATE)%>% summarise(sum=sum(QUANTITY))
+TakeOut = subset ( samsungtime2 , BRAND == "TakeOut" ) 
+TakeOut = TakeOut %>%group_by(SELL_DATE)%>% summarise(sum=sum(QUANTITY))
+
+plot(ChefsCounter$SELL_DATE,ChefsCounter$sum,type='l',col=1,ylim=c(0,800))
+lines(KOREAN1$SELL_DATE,KOREAN1$sum,type='l',col=2) 
+lines(KOREAN2$SELL_DATE,KOREAN2$sum,type='l',col=3) 
+lines(TakeOut$SELL_DATE,TakeOut$sum,type='l',col=4) 
+
+ChefsCounter$sum
+BRAND = c("ChefsCounter","KOREAN1","KOREAN2","TakeOut")
+t=data.frame(BRAND)
+t$array <- list(c(ChefsCounter$sum,KOREAN1$sum,KOREAN2$sum, TakeOut$sum))
+str(sum_data)
+
