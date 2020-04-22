@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>temp01 page</title>
+    <style>
+        #name{
+            color:blue
+        }
+        li{color:red}
+        #temp{
+            color:green
+        }
+    </style>
+</head>
+<body>
+    <div align="center">
+        <h2> 구매상품 정보</h2>
+        <table border="1" width="400">
+            <tr>
+                <th id ="temp"> 사용자</th>
+                <th id = "name"> {{name}}</th>
+            </tr>
+            <tr>
+                <th> 구매 상품 목록</th>
+                <td>
+                    <ul>
+                        {% for goods in glist %}
+                        <li> {{goods}} </li>
+                        {% endfor%}
+                    </ul>
+                </td>
+            </tr>
+        </table>
+        <br>
+        <a href="/temp02/{{name}}"> [temp02_page.html] </a>
+    </div>
+</body>
+</html>

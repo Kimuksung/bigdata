@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>주소 검색 결과</title>
+</head>
+<body>
+<div align="center">
+    <h2>주소 검색 결과</h2>
+    <table border="1">
+            <tr>
+                <th> 검색 동 이름</th>
+                <th> {{dong}}</th>
+            </tr>
+            <tr>
+                <th>
+                    전체 검색 주소
+                </th>
+                <th>
+                    <ul>
+                        {% if data :%}
+                            {% for data in data %}
+                            <li>
+                                {{data}}
+                            </li>
+                            {% endfor %}
+                        {% else :%}
+                        <li> No result </li>
+                        {% endif %}
+                    </ul>
+                </th>
+            </tr>
+    </table>
+    <br>
+    <a href="/"> Main Page </a>
+
+</div>
+</body>
+</html>
