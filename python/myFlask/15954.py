@@ -1,25 +1,23 @@
-import sys
-import math
 from decimal import *
-
-n , k = map(int,input().split())
+''''''
+n , m = map(int,input().split())
 
 arr = list(map(int,input().split()))
-re = Decimal('inf')
+
+answer = Decimal('inf')
 
 # 시작점 변경
-for s in range(n - k + 1):
-    sum_val = sum(arr[s:s + k - 1])
-    sum_val_sq = sum([v * v for v in arr[s:s + k - 1]])
+for i in range(n-m+1):
+    sum1 = sum([v for v in arr[i:i+m-1]])
+    var = sum(v**2 for v in arr[i:i+m-1])
 
-    # 길이 변경
-    for l in range(k, n - s + 1):
-        sum_val += arr[s + l - 1]
-        sum_val_sq += arr[s + l - 1] ** 2
-        aver = sum_val / Decimal(l)
-        print("avg:",aver)
-        std = (sum_val_sq / Decimal(l) - aver ** 2).sqrt()
+    for j in range(i+m,n+1):
+        sum1+= arr[j-1]
+        var += arr[j-1]**2
+        avg= sum1 / (j-i)
 
-        re = min(re, std)
+        std = (var/(j-i) - avg**2)**(1/2)
 
-print(re)
+        answer = min(answer , std)
+
+print(answer)

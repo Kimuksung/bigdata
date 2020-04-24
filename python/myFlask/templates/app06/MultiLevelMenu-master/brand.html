@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Brand</title>
+</head>
+<body>
+<div align="center">
+     <h3>  {{ brand }} 메뉴 정보 </h3>
+     <table border="1" width="600">
+        <tr>
+           <th> 메뉴 </th> <th> 가격 </th>
+        </tr>
+        {% for row in data %}
+         <tr>
+             <td> {{row[0]}}</td> <td> {{row[1]}}</td>
+         </tr>
+        {% endfor %}
+
+     </table>
+</div>
+</body>
+</html>
