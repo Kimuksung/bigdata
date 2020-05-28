@@ -1,0 +1,20 @@
+﻿* 1. Hadoop/Yarn/Historyserver 시작
+[hadoop@master ~]$ start-all.sh # 하둡/얀 시작
+[hadoop@master ~]$ mr-jobhistory-daemon.sh start historyserver # 데몬 실행
+[hadoop@master ~]$ jps    # Hadoop 상태 확인
+
+* 2. wget 명령어로 csv 파일 다운로드 
+~]$ wget http://vincentarelbundock.github.io/Rdatasets/datasets.csv
+~]$ cat datasets.csv
+
+* 3. hdfs에 파일 올리기 
+[hadoop@master ~]$ hdfs dfs -mkdir /data  # hdfs 디렉터리 만들기 
+[hadoop@master ~]$ hdfs dfs -put datasets.csv /data  # 로컬 파일 hdfs 디렉터리에 파일 올리기 
+[hadoop@master ~]$ hdfs dfs -ls /data  # - hdfs 디렉터리 보기 
+[hadoop@master ~]$ hdfs dfs -cat /data/datasets.csv  #- hdfs 파일 내용 보기
+[hadoop@master ~]$ hdfs dfs -cp /data/datasets.csv  /data/datasets2.csv  # - hdfs 파일 이동
+[hadoop@master ~]$ hdfs dfs -ls /data  # - hdfs 디렉터리 보기 
+
+*4. hdfs에서 파일 내려받기
+[hadoop@master ~]$ mkdir ~/hfile  # 사용자 디렉터리 하위에 hfile 디렉터리 생성 
+[hadoop@master ~]$ hdfs dfs -get /data/datasets.csv   ~/hfile  #- hdfs 파일 로컬 복사

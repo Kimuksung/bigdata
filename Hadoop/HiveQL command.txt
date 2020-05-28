@@ -1,0 +1,85 @@
+﻿* 1. hive 실행
+[hadoop@master hive]$ hive
+Logging initialized using configuration in file:/home/hadoop/apache-hive-1.2.2-bin/conf/hive-log4j.properties
+
+* 2. Hive 실습(NASDAQ 증권 data)
+hive> create table if not exists stocks(
+exchang string, symbol string, ymd string,
+price_open float,
+price_high float,
+price_low float,
+price_close float,
+volume int,
+price_adj_close float)
+row format delimited fields terminated by ',';
+
+hive>quit; 
+
+*  stock data file 저장 디렉터리 생성
+[hadoop@master hive]$ mkdir stock_data
+[hadoop@master hive]$ cd stock_data/
+
+* stock_data 디렉터리에 data file 다운로드(PPT 참고) 
+[hadoop@master stock_data]$ ls
+NASDAQ  NYSE
+[hadoop@master stock_data]$ 
+
+* hive에서 file 업로드 
+hive> load data local inpath '/home/hadoop/hive/stock_data/NASDAQ/*.*' overwrite into table stocks;
+Loading data to table default.stocks
+
+hive> select count(distinct symbol) from stocks;
+Total MapReduce CPU Time Spent: 29 seconds 100 msec
+OK
+3082
+
+hive> load data local inpath '/home/hadoop/hive/stock_data/NYSE/*.*' into table stocks;
+Loading data to table default.stocks
+
+* stocks 테이블 전체 레코드 수 보기 
+hive> select count(*) from stocks;
+OK
+17867630
+
+* stocks 테이블 검색 : 시가가 15000 이상 레코드 조회
+hive> select * from stocks where price_open >= 15000 ;
+hive> select exchang, symbol, ymd from stocks where price_open >= 500 limit 10 ;
+
+3. Hive 업로드 파일 보기
+* hive 업로드 파일 hdfs에서 확인(hive 업로드 파일은 hdfs에 저장됨)
+[hadoop@master hive]$ hdfs dfs -ls /user/hive/warehouse/stocks/NASDAQ*
+[hadoop@master hive]$ hdfs dfs -ls /user/hive/warehouse/stocks/NYSE*
+
+4. Hive 검색 결과 로컬 파일에 저장 
+1) HDFS 명령어 이용 
+[hadoop@master ~]$ mkdir hive_result # 디렉터리 생성 
+* HDFS에 검색 결과 저장 
+hive> INSERT OVERWRITE DIRECTORY '/user/hive/warehouse'  select * from stocks where price_open >= 15000 ;
+* 로컬 위치에 파일 저장 
+[hadoop@master hadoop-2.7.4]$  hdfs dfs -copyToLocal /user/hive/warehouse/000000_0 ~/hive_result  
+* 로컬에서 파일 확인
+[hadoop@master hadoop-2.7.4]$ ls ~/hive_result
+[hadoop@master hadoop-2.7.4]$ vi ~/hive_result/000000_0
+
+2) Linux 로컬에 결과
+[hadoop@master ~]$ mkdir hive_result2 # 디렉터리 생성 
+* 로컬 위치에 Hive 검색 결과 저장
+hive> INSERT OVERWRITE LOCAL DIRECTORY '/home/hadoop/hive_result2' select * from stocks where price_open >= 15000 ;
+* 로컬에서 파일 확인
+[hadoop@master ~]$ cd hive_result2
+[hadoop@master hive_result2]$ ls -l
+
+5. Hive QL실습
+* 뉴욕 거래소/나스탁 전체 업종 수 보기
+hive> select count(distinct symbol) from stocks ;
+
+* Apple사의 연도별 종가(Close) 평균 
+hive> select year(ymd), avg(price_close) from stocks where exchang='NASDAQ' and symbol='AAPL' group by year(ymd);
+Time taken: 112.137 seconds, Fetched: 27 row(s)
+
+* Apple사의 연도별 종가(Close) 평균 50 이상 년도 : as, having절 이용 
+hive> select year(ymd), avg(price_close) as avg_close from stocks where exchang='NASDAQ' and symbol='AAPL' group by year(ymd) having avg_close >= 50.0;
+
+* RAD사의 년도 별 종가(Close)  평균 출력 : subquery 이용
+hive> SELECT sel2.year, sel2.avg FROM (select year(ymd) as year, avg(price_close) as avg from stocks where symbol='RAD' group by year(ymd) ) sel2 ;
+
