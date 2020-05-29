@@ -1,0 +1,90 @@
+﻿https://www.slideshare.net/KangDognhyun/apache-spark-70360736
+
+* 1. Spark 다운로드(194MB) 
+http://spark.apache.org/downloads.html
+# 브라우저에서 직접 다운로드/묶음 풀기(강의자료 참고) 
+
+* 2. Soft line 지정
+[hadoop@master ~]$ pwd
+/home/hadoop
+[hadoop@master ~]$ ln -s spark-2.4.5-bin-hadoop2.7 spark # soft link
+
+* 3. path 설정
+[hadoop@master ~]$ vi .bash_profile
+
+export SPARK_HOME=/home/hadoop/spark
+export PATH=$PATH:$SPARK_HOME/bin
+
+[hadoop@master ~]$ source .bash_profile
+[hadoop@master ~]$ cd $SPARK_HOME
+
+* 4. 환경변수 설정
+spark]$ cd conf/
+conf]$ cp spark-env.sh.template spark-env.sh
+conf]$ vi spark-env.sh
+export HADOOP_CONF_DIR=${HADOOP_HOME}/etc/hadoop
+
+* 5. Spark 실행 : 버전 확인 
+conf]$  cd $SPARK_HOME
+[hadoop@master spark]$ spark-submit --version
+
+* 원주율 근사치 구하기 
+[hadoop@master spark]$ spark-submit --class org.apache.spark.examples.SparkPi examples/jars/spark-examples_2.11-2.4.5.jar 10
+
+
+*6. Spark SQL CLI 실행
+[hadoop@master spark]$ cd conf/
+
+[hadoop@master conf]$ cp $HIVE_HOME/conf/hive-site.xml . 
+[hadoop@master conf]$ 
+[hadoop@master conf]$ cp $HADOOP_HOME/etc/hadoop/core-site.xml .
+[hadoop@master conf]$ 
+[hadoop@master conf]$ cp $HADOOP_HOME/etc/hadoop/hdfs-site.xml .
+
+* iris 테이블 생성 
+spark-sql> create table iris_tab(
+         > col1 float, col2 float, col3 float, col4 float, col5 string)
+         > row format delimited fields terminated by ',' stored as textfile;
+
+spark-sql> show tables;
+
+* 데이터 삽입 
+spark-sql> load data local inpath '/home/hadoop/hfile/iris.csv' into table iris_tab;
+
+* 테이블 내용 보기 
+spark-sql> select * from iris_tab;
+spark-sql> select * from iris_tab where col1 >= 6.5;
+spark-sql> select col5, avg(col1), avg(col3)  from iris_tab  group by col5;
+
+
+#######################
+## Spark 실행방법
+#######################
+
+# 1. Spark Application 실행 
+Spark 애플리케이션을 실행하는 방식 
+
+# 방법1) spark-submit --master local
+ -> 명령을 실행하는 단일 머신 환경에서 동작(클러스터 사용 안함)
+# 방법2) spark-submit --master yarn-client
+ -> 명령을 실행하는 클라이언트 호스트에서 동작
+# 방법3) spark-submit --master yarn-cluster
+ -> 클러스터의 node manager에서 동작(클러스터 전체의 리소스 사용)
+
+# 2. 대화식으로 실행 -> 수업실습  
+scala 프로그래밍 언어를 사용하여 함수를 정의하고, 데이터를 처리하는 
+콘솔에서 실행하는 방식 
+
+# 방법1) spark-shell 
+# 방법1) spark-shell -- master local
+ -> 단일 머신 환경에서 실행(실행 속도 빠름)
+# 방법2) spark-shell -- master yarn-client
+ -> 클러스터 환경에서 실행(실행 속도 느림) 
+
+* 실행 시 다음과 같은 Error 메시지가 나오는 경우 - 새 터미널에서 실행 
+18/02/17 20:00:04 WARN Utils: Service ‘SparkUI’ could not bind on port 4040. Attempting port 4041.
+* 원인 : 이미 Spark 클러스터가 실행 중일 때 나타남(클러스터 종료 후 실행) 
+
+
+
+

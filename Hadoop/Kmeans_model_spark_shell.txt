@@ -1,0 +1,128 @@
+#######################
+###  KMeans model 
+#######################
+// local file load -> kmeans -> hdfs file upload
+
+]$start-all.sh
+]$spark-shell
+
+scala> import org.apache.spark.mllib.clustering.KMeans  // Kmeans model 생성 
+scala> import org.apache.spark.mllib.linalg.Vectors // Vector 생성 
+scala> val sparkHome = sys.env("SPARK_HOME") // 스파트 홈 디렉터리 설정(환경변수 이용)
+sparkHome: String = /home/hadoop/spark 
+scala> val data = sc.textFile("file://"+sparkHome + "/data/mllib/kmeans_data.txt") // local file read
+// "file://" 생략 시 hdfs의 url로 인식됨 
+// hdfs url 지정 시 -> "hdfs://master:9000/dir~"
+
+// Vectors 컬렉션으로 data 파싱(공백 구분, 실수형) : binding 함수 적용 
+scala> val parseData = data.map(s => Vectors.dense(s.split(' ').map(_.toDouble))).cache()
+
+// for 제너레이터 이용 data 출력 
+scala> for(line <- parseData) println(line)  
+[Stage 12:>                                                         (0 + 2) / 2][0.0,0.0,0.0]
+[0.1,0.1,0.1]
+[0.2,0.2,0.2]
+[9.0,9.0,9.0]
+[9.1,9.1,9.1]
+[9.2,9.2,9.2]
+
+// foreach() 이용 data 출력
+scala> parseData.foreach(line => println(line))
+[9.1,9.1,9.1]
+[9.2,9.2,9.2]
+[0.0,0.0,0.0]
+[0.1,0.1,0.1]
+[0.2,0.2,0.2]
+[9.0,9.0,9.0]
+
+// 군집수 지정 
+scala> val numClusters = 2
+numClusters: Int = 2
+
+// 반복 학습횟수 지정 
+scala> val numIterations = 20
+numIterations: Int = 20
+
+// model 생성 
+scala> val kmeans_model = KMeans.train(parseData, numClusters, numIterations)
+kmeans_model: org.apache.spark.mllib.clustering.KMeansModel = org.apache.spark.mllib.clustering.KMeansModel@3739758a
+
+// model 호출 멤버 보기 
+scala> kmeans_model.탭키
+clusterCenters   computeCost   k   predict   save   toPMML
+
+// 군집수 보기 
+scala> kmeans_model.k
+res12: Int = 2
+
+// 클러스터 센터
+scala> kmeans_model.clusterCenters
+res13: Array[org.apache.spark.mllib.linalg.Vector] = Array([9.099999999999998,9.099999999999998,9.099999999999998], [0.1,0.1,0.1])
+
+
+// test data 생성 
+scala> val test_data1 = Vectors.dense(0.3,0.3,0.3)
+test_data1: org.apache.spark.mllib.linalg.Vector = [0.3,0.3,0.3]
+
+scala> val test_data2 = Vectors.dense(8.0,8.0,8.0)
+test_data2: org.apache.spark.mllib.linalg.Vector = [8.0,8.0,8.0]
+
+
+// model test
+scala> kmeans_model.predict(test_data1)
+res18: Int = 1
+
+scala> kmeans_model.predict(test_data2)
+res19: Int = 0
+
+
+// 전체 데이터 model 적용 
+scala> for(line <- parseData)
+     | println(line + "=>" + kmeans_model.predict(line))
+[0.0,0.0,0.0]=>1
+[0.1,0.1,0.1]=>1
+[0.2,0.2,0.2]=>1
+[9.0,9.0,9.0]=>0
+[9.1,9.1,9.1]=>0
+[9.2,9.2,9.2]=>0
+
+scala> parseData.foreach(line =>
+     |   println(line + "=>" + kmeans_model.predict(line))
+
+
+// binding 함수 이용 예측결과 변수 저장
+scala> val kmeans_pred = parseData.map(line => kmeans_model.predict(line))  
+
+// hdfs save : kmeans 디렉터리 자동 생성 
+scala> kmeans_pred.saveAsTextFile("hdfs://master:9000/output/kmeans")
+
+// hdfs 디렉터리/파일 확인 
+[hadoop@master ~]$ hdfs dfs -ls /output/kmeans
+[hadoop@master ~]$ hdfs dfs -cat /output/kmeans/part-00000
+0
+0
+0
+1
+[hadoop@master ~]$ hdfs dfs -cat /output/kmeans/part-00001
+1
+1
+
+// hdfs에 model save : kmeans_model 디렉터리 자동 생성/model 관련 data 저장  
+scala> kmeans_model.save(sc, "/output/kmeans_model") 
+
+// spark-shell 종료
+scala> :q  
+
+]$ spark-shell
+
+
+// hdfs에서 model.load
+scala> import org.apache.spark.mllib.clustering.KMeansModel
+scala> val kmeans_model = KMeansModel.load(sc, "/output/kmeans_model")
+
+// model 예측치 테스트 
+scala>  import org.apache.spark.mllib.linalg.Vectors
+scala> val test_data1 = Vectors.dense(0.3,0.3,0.3)
+scala> kmeans_model.predict(test_data1)
+res2: Int = 0
+

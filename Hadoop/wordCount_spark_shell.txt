@@ -1,0 +1,28 @@
+// local file load -> word count -> local file save
+
+[hadoop@master spark] $ spark-shell
+scala> import org.apache.spark.SparkContext
+scala> val hadoopHome = sys.env("HADOOP_HOME")
+//hadoopHome: String = /home/hadoop/hadoop-2.9.2
+
+// text file load
+scala> val text = sc.textFile("file://"+hadoopHome+"/NOTICE.txt")
+
+// word 생성 
+scala> val words = text.flatMap(line => line.split(" "))
+scala> for(w <- words) println(w)
+
+// word count
+scala> val word_count = words.map(word => (word, 1)).reduceByKey(_+_)
+scala> for(wc <- word_count) println(wc)
+
+// local에 저장 
+scala> word_count.saveAsTextFile("file://"+hadoopHome+"/output")
+
+// 결과 확인 
+[hadoop@master hadoop-2.7.6]$ cd output
+[hadoop@master output]$ ls
+_SUCCESS  part-00000  part-00001
+[hadoop@master output]$ 
+[hadoop@master output]$ cat part-00000
+
