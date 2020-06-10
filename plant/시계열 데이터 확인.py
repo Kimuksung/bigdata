@@ -1,9 +1,5 @@
 # -*- coding: utf-8 -*-
-"""
-Created on Tue Jun  9 09:46:46 2020
 
-@author: user
-"""
 
 
 import pandas as pd
@@ -76,13 +72,15 @@ temp2['out_tem'].plot(color ='blue' , label = 'out_tem')
 temp2['loc1_coil_temp'].plot( color = 'green' , label = 'loc1_coil_temp')
 plt.show()
 
-'''
-tmp=temp2.loc1_tem['2016-04-01 0:00' : '2016-12-22 6:00']
-unsampled = tmp.resample('H').first()
-# tmp.resample('10T').first()
-unsampled
 
-unsampled.interpolate(method='linear')
+# =============================================================================
+# tmp=temp2.loc1_tem['2016-04-01 0:00' : '2016-12-22 6:00']
+# unsampled = tmp.resample('H').first()
+# # tmp.resample('10T').first()
+# unsampled
+# 
+# unsampled.interpolate(method='linear')
+# =============================================================================
 '''
 hour3 = temp2.resample('3H').first()
 hour3_temp = hour3['loc1_coil_temp']
@@ -97,5 +95,5 @@ train = train[:-1]
 test = hour3_temp.iloc[7000:]
 test = test[:-1]
 
-
+'''
 
