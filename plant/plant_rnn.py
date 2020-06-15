@@ -211,12 +211,16 @@ checkpoint_dir = os.path.dirname(checkpoint_path)
 
 callback_checkpoint = tf.keras.callbacks.ModelCheckpoint(filepath=checkpoint_path, monitor='val_loss',verbose=1,save_weights_only=True,save_best_only=True)
 
-callback_early_stopping = EarlyStopping(monitor='val_loss', patience=5, verbose=1)
+#callback_early_stopping = EarlyStopping(monitor='val_loss', patience=5, verbose=1)
+callback_early_stopping = tf.keras.callbacks.EarlyStopping(monitor='val_loss', patience=5, verbose=1)
 
+#callback_tensorboard = TensorBoard(log_dir='./23_logs/', histogram_freq=0, write_graph=False)
 callback_tensorboard = TensorBoard(log_dir='./23_logs/', histogram_freq=0, write_graph=False)
 
+#callback_reduce_lr = ReduceLROnPlateau(monitor='val_loss', factor=0.1, min_lr=1e-4,patience=0,verbose=1)
 callback_reduce_lr = ReduceLROnPlateau(monitor='val_loss', factor=0.1, min_lr=1e-4,patience=0,verbose=1)
 
+#callbacks = [callback_early_stopping,callback_checkpoint,callback_tensorboard, callback_reduce_lr]
 callbacks = [callback_early_stopping,callback_checkpoint,callback_tensorboard, callback_reduce_lr]
 
 model.fit(x=generator,
@@ -225,4 +229,61 @@ model.fit(x=generator,
  validation_data=validation_data,
  callbacks=callbacks)
 
-model.summary()
+model.save('/gdrive/My Drive/plant1/cp.ckpt')
+
+result = model.evaluate(x=np.expand_dims(x_test_scaled, axis=0),y=np.expand_dims(y_test_scaled, axis=0))
+
+print("loss (test-set):", result)
+
+def plot_comparison(start_idx, length=100, train=True):
+    if train:
+        x = x_train_scaled
+        y_true = y_train
+    else:
+        x = x_test_scaled
+        y_true = y_test
+
+    end_idx = start_idx + length
+
+    x = x[start_idx:end_idx]
+    y_true = y_true[start_idx:end_idx]
+
+    x = np.expand_dims(x, axis=0)
+    y_pred = model.predict(x)
+
+    y_pred_rescaled = y_scaler.inverse_transform(y_pred[0])
+
+    for signal in range(1):
+        signal_pred = y_pred_rescaled[:, signal]
+
+        signal_true = y_true[:, signal]
+        plt.figure(figsize=(15,5))
+
+        plt.plot(signal_true, label='true')
+        plt.plot(signal_pred, label='pred')
+
+        p = plt.axvspan(0, warmup_steps, facecolor='black', alpha=0.15)
+
+        plt.legend()
+        plt.show()
+
+plot_comparison(start_idx=0, length=500, train=True)
+
+from sklearn.metrics import classification_report
+y_true2 = y_test_scaled
+x_test_scaled2 = np.expand_dims(x_test_scaled, axis=0)
+y_pred = model.predict(x_test_scaled2)
+
+y_pred_rescaled = y_scaler.inverse_transform(y_pred[0])
+y_true3 = y_scaler.inverse_transform(y_true2)
+
+pd.Series(np.squeeze(y_pred_rescaled))
+pd.Series(np.squeeze(y_true3))
+answer = pd.DataFrame({"true": pd.Series(np.squeeze(y_true3)) , "pred": pd.Series(np.squeeze(y_pred_rescaled))})
+answer
+
+from sklearn.metrics import r2_score
+
+r2_score(answer.true, answer['pred '])
+
+hour3[ len(hour3)- 1751 : ]["loc"]
