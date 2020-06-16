@@ -16,8 +16,18 @@ import numpy as np
 print(tf.__version__)
 
 # X, Y data 정의
-x_data = np.array([1,2,3])
-y_data = np.array([2,4,6])
+#x_data = np.array([1,2,3])
+#y_data = np.array([2,4,6])
+
+
+x_data = np.array([1,2,3 ,125])
+y_data = np.array([2,4,6, 250])
+# X의 값이 큰 경우 loss가 무한대로 가는 경우가 있다.
+
+# 정규화 필요
+x_data = x_data / 125 # array([0.008, 0.016, 0.024, 1.   ])
+# np.log
+y_data = np.log(y_data) # array([0.69314718, 1.38629436, 1.79175947, 5.54517744])
 
 X = tf.placeholder(dtype = tf.float32 , shape = [None])
 Y = tf.placeholder(dtype = tf.float32 , shape = [None])
@@ -57,8 +67,9 @@ with tf.Session() as sess:
         print( "a = {} , b = {}".format(a_val , b_val))
         print()
         
-
-
+    #model test
+    y_pred = sess.run(model , feed_dict = { X : [2.5 / 125]})
+    print(y_pred)
 
 
 
